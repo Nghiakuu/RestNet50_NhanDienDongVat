@@ -24,17 +24,15 @@ def kiem_tra_dong_vat(image):
     img_array = np.expand_dims(img_array, axis=0)
     img_array = preprocess_input(img_array)
     
-    # Dự đoán
+    # Dự đoán kết quả đầu tiên
     preds = tai_mo_hinh().predict(img_array)
     decoded_preds = decode_predictions(preds, top=1)[0]
-    
-    # Lấy class đầu tiên
-    class_name = decoded_preds[0][1]
     
     # Đọc danh sách động vật từ module data
     danh_sach_dong_vat = doc_ten_tieng_anh()
     
-    # Kiểm tra xem class có phải là động vật không
+    # Kiểm tra kết quả đầu tiên
+    class_name = chuan_hoa_nhan(decoded_preds[0][1])
     return class_name in danh_sach_dong_vat
 
 def du_doan(hinh_anh, ten_tieng_viet, ten_tieng_anh_chuan):
