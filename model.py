@@ -1,0 +1,43 @@
+import tensorflow as tf
+from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+import numpy as np
+from PIL import Image
+import streamlit as st
+from utils import chuan_hoa_nhan
+
+@st.cache_resource
+def tai_mo_hinh():
+    """Tải mô hình ResNet50 đã được huấn luyện sẵn"""
+    return ResNet50(weights='imagenet')
+
+def du_doan(hinh_anh, ten_tieng_viet, ten_tieng_anh_chuan):
+    """Thực hiện dự đoán trên hình ảnh đầu vào"""
+    # Chuyen doi anh thanh RGB
+    if hinh_anh.mode != "RGB":
+        hinh_anh = hinh_anh.convert("RGB")
+    
+    # Tai mo hinh
+    mo_hinh = tai_mo_hinh()
+    
+
+    img = hinh_anh.resize((224, 224))
+    img_array = np.array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)
+    
+    # Du doan
+    ket_qua = mo_hinh.predict(img_array)
+    decoded = decode_predictions(ket_qua, top=3)[0]
+    
+    # Chuyen doi ket qua sang tieng Viet
+    ket_qua = []
+    for _, nhan, diem in decoded:
+        nhan_chuan = chuan_hoa_nhan(nhan)
+        try:
+            idx = ten_tieng_anh_chuan.index(nhan_chuan)
+            ten_vi = ten_tieng_viet[idx] if idx < len(ten_tieng_viet) else nhan
+            ket_qua.append((nhan, ten_vi, diem))
+        except ValueError:
+            ket_qua.append((nhan, nhan, diem))
+    
+    return ket_qua 
