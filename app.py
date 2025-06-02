@@ -172,9 +172,9 @@ with col1:
     if uploaded_file is not None:
         # Hiển thị ảnh
         image = Image.open(uploaded_file)
-        st.image(image, caption='Hình ảnh đã tải lên', use_container_width=True)
+        st.image(image, caption='Hình ảnh đã tải lên', use_container_width=True) # use_container_width  use_column_width
         
-        # Nut nhan dien
+        # Nut nhan diend
         if st.button('🔍 Nhận diện'):
             with st.spinner('Đang phân tích hình ảnh...'):
                 # Tải danh sách tên
@@ -190,9 +190,12 @@ with col1:
                         st.markdown("### 📊 Kết quả nhận diện")
                         
                         # Hiển thị top 3 kết quả
+                        wiki_url = None
+                        ten_vi_top1 = None
                         for i, (_, ten_vi, diem) in enumerate(ket_qua):
                             if i == 0:
                                 accuracy_img = "images/High.png"
+                                ten_vi_top1 = ten_vi
                             elif i == 1:
                                 accuracy_img = "images/Medium.png"
                             else:
@@ -224,18 +227,18 @@ with col1:
                                     <img src="data:image/png;base64,{img_base64}" style="width: 100px; height: 100px; margin-left: 20px;">
                                 </div>
                             """, unsafe_allow_html=True)
-                            
-                            # Lấy thông tin về loài động vật
-                            if i == 0:  # Chỉ lấy thông tin cho kết quả đầu tiên
+                            # Lấy thông tin về loài động vật cho kết quả đầu tiên
+                            if i == 0:
                                 wiki_url = lay_thong_tin_dong_vat(ten_vi)
-                                if wiki_url:
-                                    st.markdown(f"""
-                                        <div style='margin-top: 1rem;'>
-                                            <a href='{wiki_url}' target='_blank' class='wiki-link'>
-                                                🔗 Tìm hiểu thêm về {ten_vi}
-                                            </a>
-                                        </div>
-                                    """, unsafe_allow_html=True)
+                        # Hiển thị link wiki ra ngoài, dưới cùng khối #1
+                        if wiki_url and ten_vi_top1:
+                            st.markdown(f"""
+                                <div style='text-align: center; margin: 0 auto 1.5rem auto; max-width: 400px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f5f7fa; padding: 1rem;'>
+                                    <a href='{wiki_url}' target='_blank' class='wiki-link' style='font-size: 1.1rem; font-weight: 600;'>
+                                        🔗 Tìm hiểu thêm về {ten_vi_top1}
+                                    </a>
+                                </div>
+                            """, unsafe_allow_html=True)
                         
                         st.markdown("""
                             <div style='margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 10px;'>
