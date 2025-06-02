@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 from utils import lay_thong_tin_dong_vat, chuan_hoa_nhan
-from model import du_doan
+from model import du_doan, tai_mo_hinh, kiem_tra_dong_vat
 from data import tai_danh_sach_ten, doc_ten_tieng_anh
 import base64
 
@@ -176,80 +176,84 @@ with col1:
         
         # Nut nhan diend
         if st.button('🔍 Nhận diện'):
-            with st.spinner('Đang phân tích hình ảnh...'):
-                # Tải danh sách tên
-                ten_tieng_viet = tai_danh_sach_ten()
-                ten_tieng_anh = doc_ten_tieng_anh()
-                ten_tieng_anh_chuan = [chuan_hoa_nhan(ten) for ten in ten_tieng_anh]
-                
-                # Thuc hien du doan
-                ket_qua = du_doan(image, ten_tieng_viet, ten_tieng_anh_chuan)
-                
-                if ket_qua:
-                    with col2:
-                        st.markdown("### 📊 Kết quả nhận diện")
-                        
-                        # Hiển thị top 3 kết quả
-                        wiki_url = None
-                        ten_vi_top1 = None
-                        for i, (_, ten_vi, diem) in enumerate(ket_qua):
-                            if i == 0:
-                                accuracy_img = "images/High.png"
-                                ten_vi_top1 = ten_vi
-                            elif i == 1:
-                                accuracy_img = "images/Medium.png"
-                            else:
-                                accuracy_img = "images/Low.png"
-                            img_base64 = image_to_base64(accuracy_img)
-                            if diem > 0.5:
-                                accuracy_text = "Cao"
-                            elif diem > 0.3:
-                                accuracy_text = "Trung bình"
-                            else:
-                                accuracy_text = "Thấp"
+            # Kiểm tra xem ảnh có phải là động vật không
+            if not kiem_tra_dong_vat(image):
+                st.error("⚠️ Ảnh này không phải là động vật! Vui lòng tải lên ảnh chứa động vật.")
+            else:
+                with st.spinner('Đang phân tích hình ảnh...'):
+                    # Tải danh sách tên
+                    ten_tieng_viet = tai_danh_sach_ten()
+                    ten_tieng_anh = doc_ten_tieng_anh()
+                    ten_tieng_anh_chuan = [chuan_hoa_nhan(ten) for ten in ten_tieng_anh]
+                    
+                    # Thuc hien du doan
+                    ket_qua = du_doan(image, ten_tieng_viet, ten_tieng_anh_chuan)
+                    
+                    if ket_qua:
+                        with col2:
+                            st.markdown("### 📊 Kết quả nhận diện")
+                            
+                            # Hiển thị top 3 kết quả
+                            wiki_url = None
+                            ten_vi_top1 = None
+                            for i, (_, ten_vi, diem) in enumerate(ket_qua):
+                                if i == 0:
+                                    accuracy_img = "images/High.png"
+                                    ten_vi_top1 = ten_vi
+                                elif i == 1:
+                                    accuracy_img = "images/Medium.png"
+                                else:
+                                    accuracy_img = "images/Low.png"
+                                img_base64 = image_to_base64(accuracy_img)
+                                if diem > 0.5:
+                                    accuracy_text = "Cao"
+                                elif diem > 0.3:
+                                    accuracy_text = "Trung bình"
+                                else:
+                                    accuracy_text = "Thấp"
 
-                            st.markdown(f"""
-                                <div style="
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: space-between;
-                                    background: #fff;
-                                    border-radius: 16px;
-                                    box-shadow: 0 4px 12px rgba(44,62,80,0.08);
-                                    padding: 1.2rem 1.5rem;
-                                    margin-bottom: 1.2rem;
-                                    border: 1px solid #e0e0e0;
-                                ">
-                                    <div>
-                                        <h4 style='color: #2c3e50; margin-bottom: 0.5rem; margin-top: 0;'>#{i+1} {ten_vi}</h4>
-                                        <p style='color: #666; margin: 0;'>Độ chính xác: {diem*100:.2f}% ({accuracy_text})</p>
+                                st.markdown(f"""
+                                    <div style="
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: space-between;
+                                        background: #fff;
+                                        border-radius: 16px;
+                                        box-shadow: 0 4px 12px rgba(44,62,80,0.08);
+                                        padding: 1.2rem 1.5rem;
+                                        margin-bottom: 1.2rem;
+                                        border: 1px solid #e0e0e0;
+                                    ">
+                                        <div>
+                                            <h4 style='color: #2c3e50; margin-bottom: 0.5rem; margin-top: 0;'>#{i+1} {ten_vi}</h4>
+                                            <p style='color: #666; margin: 0;'>Độ chính xác: {diem*100:.2f}% ({accuracy_text})</p>
+                                        </div>
+                                        <img src="data:image/png;base64,{img_base64}" style="width: 100px; height: 100px; margin-left: 20px;">
                                     </div>
-                                    <img src="data:image/png;base64,{img_base64}" style="width: 100px; height: 100px; margin-left: 20px;">
+                                """, unsafe_allow_html=True)
+                                # Lấy thông tin về loài động vật cho kết quả đầu tiên
+                                if i == 0:
+                                    wiki_url = lay_thong_tin_dong_vat(ten_vi)
+                            # Hiển thị link wiki ra ngoài, dưới cùng khối #1
+                            if wiki_url and ten_vi_top1:
+                                st.markdown(f"""
+                                    <div style='text-align: center; margin: 0 auto 1.5rem auto; max-width: 400px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f5f7fa; padding: 1rem;'>
+                                        <a href='{wiki_url}' target='_blank' class='wiki-link' style='font-size: 1.1rem; font-weight: 600;'>
+                                            🔗 Tìm hiểu thêm về {ten_vi_top1}
+                                        </a>
+                                    </div>
+                                """, unsafe_allow_html=True)
+                            
+                            st.markdown("""
+                                <div style='margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 10px;'>
+                                    <h4 style='color: #2c3e50; margin-bottom: 1rem;'>💡 Lưu ý</h4>
+                                    <ul style='color: #666; margin: 0; padding-left: 1.5rem;'>
+                                        <li>Kết quả được sắp xếp theo độ chính xác giảm dần</li>
+                                        <li>Độ chính xác được tính theo phần trăm</li>
+                                        <li>Bạn có thể tìm hiểu thêm về loài động vật qua link Wikipedia</li>
+                                    </ul>
                                 </div>
                             """, unsafe_allow_html=True)
-                            # Lấy thông tin về loài động vật cho kết quả đầu tiên
-                            if i == 0:
-                                wiki_url = lay_thong_tin_dong_vat(ten_vi)
-                        # Hiển thị link wiki ra ngoài, dưới cùng khối #1
-                        if wiki_url and ten_vi_top1:
-                            st.markdown(f"""
-                                <div style='text-align: center; margin: 0 auto 1.5rem auto; max-width: 400px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f5f7fa; padding: 1rem;'>
-                                    <a href='{wiki_url}' target='_blank' class='wiki-link' style='font-size: 1.1rem; font-weight: 600;'>
-                                        🔗 Tìm hiểu thêm về {ten_vi_top1}
-                                    </a>
-                                </div>
-                            """, unsafe_allow_html=True)
-                        
-                        st.markdown("""
-                            <div style='margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 10px;'>
-                                <h4 style='color: #2c3e50; margin-bottom: 1rem;'>💡 Lưu ý</h4>
-                                <ul style='color: #666; margin: 0; padding-left: 1.5rem;'>
-                                    <li>Kết quả được sắp xếp theo độ chính xác giảm dần</li>
-                                    <li>Độ chính xác được tính theo phần trăm</li>
-                                    <li>Bạn có thể tìm hiểu thêm về loài động vật qua link Wikipedia</li>
-                                </ul>
-                            </div>
-                        """, unsafe_allow_html=True)
     else:
         with col2:
             st.markdown("""
