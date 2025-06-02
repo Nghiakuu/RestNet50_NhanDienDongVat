@@ -11,4 +11,7 @@
 
 - Ứng dụng có thể nhận diện được nhiều loại động vật khác nhau
 - Kết quả sẽ hiển thị bằng tiếng Việt
-- Hỗ trợ các định dạng ảnh: JPG, JPEG, PNG 
+- Hỗ trợ các định dạng ảnh: JPG, JPEG, PNG
+
+# Link Demo
+https://nghiantrestnet50.streamlit.app/
