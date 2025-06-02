@@ -172,7 +172,7 @@ with col1:
     if uploaded_file is not None:
         # Hiển thị ảnh
         image = Image.open(uploaded_file)
-        st.image(image, caption='Hình ảnh đã tải lên', use_column_width=True)
+        st.image(image, caption='Hình ảnh đã tải lên', use_container_width=True)
         
         # Nut nhan dien
         if st.button('🔍 Nhận diện'):
