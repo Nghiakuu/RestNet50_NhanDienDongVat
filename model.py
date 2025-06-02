@@ -31,8 +31,13 @@ def kiem_tra_dong_vat(image):
     # Đọc danh sách động vật từ module data
     danh_sach_dong_vat = doc_ten_tieng_anh()
     
-    # Kiểm tra kết quả đầu tiên
+    # Debug: In ra tên class trước và sau khi chuẩn hóa
+    #st.write("Debug - Tên class gốc:", decoded_preds[0][1])
     class_name = chuan_hoa_nhan(decoded_preds[0][1])
+    #st.write("Debug - Tên class sau khi chuẩn hóa:", class_name)
+
+    
+    # Kiểm tra kết quả đầu tiên
     return class_name in danh_sach_dong_vat
 
 def du_doan(hinh_anh, ten_tieng_viet, ten_tieng_anh_chuan):

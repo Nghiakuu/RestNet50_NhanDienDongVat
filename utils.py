@@ -13,4 +13,4 @@ def lay_thong_tin_dong_vat(ten_dong_vat):
 
 def chuan_hoa_nhan(nhan):
     """Chuẩn hóa nhãn bằng cách thay thế dấu gạch dưới và chuyển về chữ thường"""
-    return nhan.replace('_', ' ').lower() 
+    return nhan.replace('_', ' ') 
