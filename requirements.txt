@@ -2,3 +2,6 @@ tensorflow
 Pillow
 numpy
 streamlit
+requests
+tensorflow-hub
+tensorflow-io-gcs-filesystem
